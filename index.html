@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>itteki | Eastern thought</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#ede7da;--ink:#1f1e1b;--sub:#7a766c;--accent:#c23b22;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#181715;--ink:#e8e2d4;--sub:#8a857a}}
+:root[data-theme="dark"]{--bg:#181715;--ink:#e8e2d4;--sub:#8a857a}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;font-family:"Cormorant Garamond","EB Garamond",Georgia,"Times New Roman",serif;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+main{position:relative;height:100%;display:grid;grid-template-rows:auto 1fr;padding:22px 8vw 0;box-sizing:border-box;pointer-events:none}
+main.pre header,main.pre .hint{opacity:0}
+header{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.12em;color:var(--sub);transition:opacity 1.2s ease}
+.hint{display:grid;place-content:center;justify-items:center;gap:18px;transition:opacity .8s ease}
+.hint.off{opacity:0}
+.seal{display:block;width:18px;height:18px;border-radius:2px;background:var(--accent);color:var(--bg);font-style:normal;font-size:12px;line-height:18px;text-align:center}
+.hint span{font-size:14px;letter-spacing:.18em;color:var(--sub)}
+article{position:fixed;left:0;top:0;visibility:hidden;width:max-content;max-width:min(20em,84vw);font-size:clamp(22px,5.8vw,32px);pointer-events:none}
+#q{margin:0;font-weight:500;line-height:1.5;letter-spacing:.01em;white-space:pre-line}
+.meta{margin-top:1.5em;font-size:14px;color:var(--sub)}
+.meta p{margin:0;line-height:1.6;letter-spacing:.04em}
+#who{color:var(--ink);font-size:16px}
+#src{margin-top:.3em}
+article.note{font-size:clamp(18px,4.8vw,23px)}
+article.note #q{font-weight:500}
+.fade{opacity:0;transition:opacity 1.6s cubic-bezier(.2,.6,.2,1)}
+.meta.fade{transition-delay:.5s}
+.fade.on{opacity:1}
+@keyframes sink{0%{opacity:1;transform:translateY(0);filter:blur(0)}100%{opacity:0;transform:translateY(30px);filter:blur(9px)}}
+@keyframes soft{to{opacity:0}}
+article.sink,.foot.sink{animation:sink 3.6s cubic-bezier(.45,0,.85,.4) forwards}
+.foot{position:fixed;left:8vw;right:8vw;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin:0;font-size:10px;letter-spacing:.06em;line-height:1.6;color:var(--sub);opacity:0;transition:opacity 1.6s cubic-bezier(.2,.6,.2,1);transition-delay:.5s}
+.foot.on{opacity:1}
+#intro{position:fixed;inset:0;z-index:20;display:grid;place-content:center;justify-items:center;transition:opacity .9s ease}
+#intro.out{opacity:0;pointer-events:none}
+#intro .box{opacity:0;transition:opacity 1.3s ease;text-align:center}
+#intro.in .box{opacity:1}
+#intro.in.fade .box{opacity:0;transition-duration:1s}
+#intro h1{margin:0;font-weight:500;font-size:clamp(40px,12vw,64px);letter-spacing:.3em;padding-left:.3em}
+#intro p{margin:1.4em 0 0;font-size:13px;letter-spacing:.2em;padding-left:.2em;color:var(--sub)}
+#drop{display:block;position:absolute;left:50%;top:50%;width:10px;height:14px;margin:-7px 0 0 -5px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:var(--ink);opacity:0}
+@media (prefers-reduced-motion:reduce){.fade,.hint,.foot,header,#intro .box{transition:none}.meta.fade,.foot{transition-delay:0s}article.sink,.foot.sink{animation:soft 1.2s forwards}}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<main class="pre">
+  <header><span>itteki</span><span id="date"></span></header>
+  <div class="hint" id="hint"><i class="seal">滴</i><span>Let a drop fall</span></div>
+  <p class="foot">Words belong to their respective rights holders. Translations are unofficial.</p>
+</main>
+<div id="intro" aria-hidden="true"><div class="box"><h1>itteki</h1><p>Today’s word | Eastern thought</p></div><i id="drop"></i></div>
+<article id="art" aria-live="polite">
+  <p id="q" class="fade"></p>
+  <div class="meta fade" id="meta">
+    <p id="who"></p>
+    <p id="src"></p>
+  </div>
+</article>
+<script>
+const Q=[
+{t:"Mind comes before all things, and mind makes the world.",p:"The Buddha",o:"Dhammapada (adapted translation)"},
+{t:"It is the emptiness inside a vessel that makes it useful.",p:"Laozi",o:"Tao Te Ching, ch. 11 (paraphrase)"},
+{t:"Am I dreaming of a butterfly, or is a butterfly dreaming of me?",p:"Zhuangzi",o:"Zhuangzi, “Qiwulun”"},
+{t:"To study the Buddha way is to study the self.",p:"Dōgen",o:"Shōbōgenzō, “Genjōkōan”"},
+{t:"The present moment is the only time in which we can touch life.",p:"Thich Nhat Hanh",o:""},
+{t:"A thousand days of practice to forge; ten thousand days to polish.",p:"Miyamoto Musashi",o:"The Book of Five Rings, Water"},
+{t:"The highest good is like water.",p:"Laozi",o:"Tao Te Ching, ch. 8"},
+{t:"To err and not to correct it: that is what is called an error.",p:"Confucius",o:"Analects, “Wei Ling Gong”"},
+{t:"All things are already within me.",p:"Mencius",o:"Mencius, “Jin Xin I”"},
+{t:"From the very beginning, all beings are Buddha.",p:"Hakuin Ekaku",o:"Song in Praise of Zazen"},
+{t:"Form is emptiness, emptiness is form.",p:"The Heart Sutra",o:""},
+{t:"Hatred is never calmed by hatred.",p:"The Buddha",o:"Dhammapada (adapted translation)"},
+{t:"Walk alone, like the horn of the rhinoceros.",p:"Sutta Nipata",o:"“The Rhinoceros Horn”"},
+{t:"The flowing river never stops, and yet the water is never the same.",p:"Kamo no Chōmei",o:"Hōjōki (opening)"},
+{t:"An old pond—\na frog jumps in,\nthe sound of water.",p:"Matsuo Bashō",o:"Haiku"},
+{t:"When disaster comes, it is best to meet it.",p:"Ryōkan",o:"Letter after the Sanjō earthquake, 1828"},
+{t:"Spring, flowers. Summer, the cuckoo. Autumn, the moon. Winter, snow—clear and cold.",p:"Dōgen",o:"Sanshō Dōei"}
+];
+
+const SHOW_MS=8000,SINK_MS=3600,NOTE_MS=6000,FREE=false,KEY="iee";
+// Up to 20 words: 8 seconds. Beyond that, add 1 second per 5 words
+const showMs=t=>SHOW_MS+Math.max(0,Math.ceil((t.trim().split(/\s+/).length-20)/5))*1000;
+const $=id=>document.getElementById(id);
+const art=$("art"),q=$("q"),meta=$("meta"),hint=$("hint"),foot=document.querySelector(".foot");
+const pad=n=>String(n).padStart(2,"0");
+const nowDay=()=>{const n=new Date();return n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate())};
+$("date").textContent=nowDay().replace(/-/g,".");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const after=(ms,fn)=>setTimeout(fn,ms);
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let cur=-1,busy=true,introOn=true;
+
+/* 落款の色: 朱・藍・苔・紫 */
+const ACC=[["#c23b22","#e0664d"],["#2f5c8a","#6fa0cf"],["#5c7a47","#8dae74"],["#6b4c8a","#a58ac6"]];
+let ai=-1;
+function isDark(){const t=document.documentElement.getAttribute("data-theme");return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches}
+function accent(next){
+  if(next){let i;do{i=Math.floor(Math.random()*ACC.length)}while(i===ai);ai=i}
+  document.documentElement.style.setProperty("--accent",ACC[ai][isDark()?1:0]);
+}
+accent(true);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>accent());
+
+/* 墨: 滲みと波紋 */
+const c=$("c"),x=c.getContext("2d"),R=[];
+let W,H,inkRGB=[31,30,27],colT=0,nextA=performance.now()+1200,nextB=performance.now()+4000;
+function size(){const D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*D;c.height=H*D;x.setTransform(D,0,0,D,0,0)}
+size();addEventListener("resize",size);
+function hexRgb(h){h=h.replace("#","");if(h.length===3)h=h.split("").map(z=>z+z).join("");return [0,2,4].map(i=>parseInt(h.substr(i,2),16))}
+function wash(px,py,m,d,a){if(reduce)return;R.push({k:1,x:px,y:py,t:performance.now(),d:d,m:m,a:a})}
+function ring(px,py,n,o){
+  if(reduce)return;o=o||{};const t=performance.now();
+  for(let i=0;i<(n||3);i++)R.push({k:0,x:px,y:py,t:t+i*(o.gap||300),d:o.d||4200,m:o.m||Math.min(W,H)*.5,a:o.a||.4});
+}
+function touchInk(px,py){wash(px,py,Math.min(W,H)*.42,6500,.2);ring(px,py,3,{m:Math.min(W,H)*.5,a:.35})}
+function frame(now){
+  x.clearRect(0,0,W,H);
+  if(now-colT>500){const v=getComputedStyle(document.documentElement).getPropertyValue("--ink").trim()||"#1f1e1b";inkRGB=hexRgb(v);colT=now}
+  if(!busy&&!document.hidden){
+    if(now>nextA){wash(rnd(W*.1,W*.9),rnd(H*.15,H*.9),rnd(70,150),rnd(6000,9000),.07);nextA=now+rnd(2800,6500)}
+    if(now>nextB){ring(rnd(W*.1,W*.9),rnd(H*.15,H*.9),2,{m:rnd(40,90),d:rnd(3200,4600),a:.14,gap:420});nextB=now+rnd(5000,10000)}
+  }
+  const r=inkRGB[0],g=inkRGB[1],b=inkRGB[2];
+  for(let i=R.length-1;i>=0;i--){
+    const o=R[i],a=(now-o.t)/o.d;
+    if(a>=1){R.splice(i,1);continue}
+    if(a<0)continue;
+    const e=1-Math.pow(1-a,3);
+    if(o.k){
+      const rad=o.m*(.35+.65*e),gr=x.createRadialGradient(o.x,o.y,rad*.1,o.x,o.y,rad);
+      gr.addColorStop(0,"rgba("+r+","+g+","+b+",1)");gr.addColorStop(1,"rgba("+r+","+g+","+b+",0)");
+      x.globalAlpha=o.a*Math.pow(1-a,1.4);x.fillStyle=gr;x.beginPath();x.arc(o.x,o.y,rad,0,6.2832);x.fill();
+    }else{
+      x.globalAlpha=Math.pow(1-a,2)*o.a;x.strokeStyle="rgb("+r+","+g+","+b+")";x.lineWidth=1;
+      x.beginPath();x.arc(o.x,o.y,e*o.m,0,6.2832);x.stroke();
+    }
+  }
+  x.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+if(!reduce)requestAnimationFrame(frame);
+
+/* 言葉 */
+function fill(i){
+  const o=Q[i];cur=i;
+  q.textContent=o.t;$("who").textContent=o.p;
+  const s=$("src");s.textContent=o.o;s.hidden=!o.o;
+}
+function place(){
+  const w=art.offsetWidth,h=art.offsetHeight,mx=Math.max(20,W*.06),top0=64,bot=64;
+  art.style.left=(mx+Math.random()*Math.max(0,W-w-mx*2))+"px";
+  art.style.top=(top0+Math.random()*Math.max(0,H-h-top0-bot))+"px";
+}
+function sink(){
+  const r=art.getBoundingClientRect();
+  wash(r.left+r.width/2,r.top+r.height/2,120,4200,.16);
+  ring(r.left+r.width/2,r.top+r.height/2,1,{m:90,d:3600,a:.3});
+  art.classList.add("sink");
+  if(foot.classList.contains("on"))foot.classList.add("sink");
+  after(reduce?1200:SINK_MS,()=>{
+    art.classList.remove("sink","note");meta.hidden=false;foot.classList.remove("sink","on");
+    q.classList.remove("on");meta.classList.remove("on");
+    art.style.visibility="hidden";
+    if(!locked())hint.classList.remove("off");
+    busy=false;
+  });
+}
+
+/* 全部出し切るまで同じ言葉は出ない */
+let bag=[];
+try{
+  const s=JSON.parse(localStorage.getItem(KEY+"-bag")||"{}");
+  if(Array.isArray(s.b))bag=s.b.filter(n=>Number.isInteger(n)&&n>=0&&n<Q.length);
+  if(Number.isInteger(s.l)&&s.l>=0&&s.l<Q.length)cur=s.l;
+}catch(e){}
+function nextIdx(){
+  if(!bag.length){
+    bag=Q.map((_,k)=>k);
+    for(let k=bag.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[bag[k],bag[j]]=[bag[j],bag[k]]}
+    if(bag.length>1&&bag[bag.length-1]===cur)[bag[0],bag[bag.length-1]]=[bag[bag.length-1],bag[0]];
+  }
+  const i=bag.pop();
+  try{localStorage.setItem(KEY+"-bag",JSON.stringify({b:bag,l:i}))}catch(e){}
+  return i;
+}
+
+/* 一日一回（0時で切り替え） */
+function locked(){if(FREE)return false;try{return localStorage.getItem(KEY+"-day")===nowDay()}catch(e){return false}}
+function markDrawn(){try{localStorage.setItem(KEY+"-day",nowDay())}catch(e){}}
+function showNote(){
+  busy=true;
+  after(reduce?200:700,()=>{
+    q.textContent="One word a day.\nCome back after midnight to meet the next.";
+    meta.hidden=true;art.classList.add("note");place();
+    art.style.visibility="visible";
+    q.classList.add("on");
+    after(NOTE_MS,sink);
+  });
+}
+
+/* 操作 */
+function touch(px,py){
+  if(introOn)return;
+  touchInk(px,py);
+  if(busy)return;
+  if(locked()){showNote();return}
+  busy=true;hint.classList.add("off");
+  const i=nextIdx();markDrawn();
+  after(reduce?200:1500,()=>{
+    fill(i);place();accent(true);
+    art.style.visibility="visible";
+    q.classList.add("on");meta.classList.add("on");foot.classList.add("on");
+    after(showMs(Q[i].t),sink);
+  });
+}
+addEventListener("pointerdown",e=>touch(e.clientX,e.clientY));
+addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();touch(W/2,H*.45)}});
+if(locked())hint.classList.add("off");
+
+/* オープニング: 墨が一滴落ちて滲む → いってき → 本画面（タップでスキップ） */
+(function(){
+  const intro=$("intro"),drop=$("drop"),mainEl=document.querySelector("main");
+  let done=false,anim=null;
+  function end(){
+    if(done)return;done=true;
+    if(anim)anim.cancel();
+    intro.classList.add("out");
+    mainEl.classList.remove("pre");
+    after(900,()=>{intro.remove();introOn=false;busy=false});
+  }
+  intro.addEventListener("pointerdown",end);
+  if(reduce){after(300,()=>intro.classList.add("in"));after(2400,end);return}
+  after(500,()=>{
+    if(done)return;
+    anim=drop.animate([
+      {transform:"translateY("+(-H*.5)+"px) scaleY(1.5)",opacity:0},
+      {opacity:1,offset:.14},
+      {transform:"translateY(0) scaleY(1.2)",opacity:1}
+    ],{duration:900,easing:"cubic-bezier(.55,0,.9,.55)",fill:"forwards"});
+  });
+  after(1400,()=>{
+    if(done)return;
+    if(anim)anim.cancel();
+    drop.style.opacity=0;
+    wash(W/2,H*.5,Math.min(W,H)*.62,7000,.24);
+    ring(W/2,H*.5,4,{m:Math.max(W,H)*.55,d:5200,a:.4,gap:360});
+  });
+  after(1900,()=>{if(!done)intro.classList.add("in")});
+  after(4600,()=>{if(!done)intro.classList.add("fade")});
+  after(5500,end);
+})();
+</script>
+</body>
+</html>
