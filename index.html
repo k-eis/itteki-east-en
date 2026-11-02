@@ -47,6 +47,7 @@ article.sink,.foot.sink{animation:sink 3.6s cubic-bezier(.45,0,.85,.4) forwards}
 #intro p{margin:1.4em 0 0;font-size:13px;letter-spacing:.2em;padding-left:.2em;color:var(--sub)}
 #drop{display:block;position:absolute;left:50%;top:50%;width:10px;height:14px;margin:-7px 0 0 -5px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:var(--ink);opacity:0}
 @media (prefers-reduced-motion:reduce){.fade,.hint,.foot,header,#intro .box{transition:none}.meta.fade,.foot{transition-delay:0s}article.sink,.foot.sink{animation:soft 1.2s forwards}}
+#tn{margin:.9em 0 0;font-size:11px;letter-spacing:.06em;line-height:1.6;color:var(--sub);opacity:.85}
 </style>
 </head>
 <body>
@@ -62,6 +63,7 @@ article.sink,.foot.sink{animation:sink 3.6s cubic-bezier(.45,0,.85,.4) forwards}
   <div class="meta fade" id="meta">
     <p id="who"></p>
     <p id="src"></p>
+    <p id="tn" hidden></p>
   </div>
 </article>
 <script>
@@ -88,7 +90,7 @@ const SHOW_MS=8000,SINK_MS=3600,NOTE_MS=6000,FREE=false,KEY="iee";
 // Up to 20 words: 8 seconds. Beyond that, add 1 second per 5 words
 const showMs=t=>SHOW_MS+Math.max(0,Math.ceil((t.trim().split(/\s+/).length-20)/5))*1000;
 const $=id=>document.getElementById(id);
-const art=$("art"),q=$("q"),meta=$("meta"),hint=$("hint"),foot=document.querySelector(".foot");
+const art=$("art"),q=$("q"),meta=$("meta"),hint=$("hint"),foot=document.querySelector(".foot"),tn=$("tn");
 const pad=n=>String(n).padStart(2,"0");
 const nowDay=()=>{const n=new Date();return n.getFullYear()+"-"+pad(n.getMonth()+1)+"-"+pad(n.getDate())};
 $("date").textContent=nowDay().replace(/-/g,".");
@@ -165,7 +167,7 @@ function sink(){
   art.classList.add("sink");
   if(foot.classList.contains("on"))foot.classList.add("sink");
   after(reduce?1200:SINK_MS,()=>{
-    art.classList.remove("sink","note");meta.hidden=false;foot.classList.remove("sink","on");
+    art.classList.remove("sink","note");meta.hidden=false;tn.hidden=true;foot.classList.remove("sink","on");
     q.classList.remove("on");meta.classList.remove("on");
     art.style.visibility="hidden";
     if(!locked())hint.classList.remove("off");
@@ -193,7 +195,18 @@ function nextIdx(){
 
 /* 一日一回（0時で切り替え） */
 function locked(){if(FREE)return false;try{return localStorage.getItem(KEY+"-day")===nowDay()}catch(e){return false}}
-function markDrawn(){try{localStorage.setItem(KEY+"-day",nowDay())}catch(e){}}
+function markDrawn(i){try{localStorage.setItem(KEY+"-day",nowDay());localStorage.setItem(KEY+"-i",String(i))}catch(e){}}
+function todayIdx(){try{if(localStorage.getItem(KEY+"-day")!==nowDay())return -1;const v=parseInt(localStorage.getItem(KEY+"-i"),10);return Number.isInteger(v)&&v>=0&&v<Q.length?v:-1}catch(e){return -1}}
+// 同じ日の2回目以降は、今日の言葉をもう一度浮かべて、小さな案内を添える
+function showToday(i){
+  busy=true;hint.classList.add("off");
+  after(reduce?200:700,()=>{
+    fill(i);tn.textContent="Today’s word. Come back after midnight to meet the next.";tn.hidden=false;place();accent(true);
+    art.style.visibility="visible";
+    q.classList.add("on");meta.classList.add("on");foot.classList.add("on");
+    after(showMs(Q[i].t),sink);
+  });
+}
 function showNote(){
   busy=true;
   after(reduce?200:700,()=>{
@@ -210,9 +223,9 @@ function touch(px,py){
   if(introOn)return;
   touchInk(px,py);
   if(busy)return;
-  if(locked()){showNote();return}
+  if(locked()){const ti=todayIdx();if(ti>=0)showToday(ti);else showNote();return}
   busy=true;hint.classList.add("off");
-  const i=nextIdx();markDrawn();
+  const i=nextIdx();markDrawn(i);
   after(reduce?200:1500,()=>{
     fill(i);place();accent(true);
     art.style.visibility="visible";
