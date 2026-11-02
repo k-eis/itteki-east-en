@@ -224,7 +224,7 @@ function touch(px,py){
   if(introOn)return;
   touchInk(px,py);
   if(busy)return;
-  if(locked()){const ti=todayIdx();if(ti>=0)showToday(ti);else showNote();return}
+  if(locked()){const ti=todayIdx();if(ti>=0){showToday(ti);return}}
   busy=true;hint.classList.add("off");
   const i=nextIdx();markDrawn(i);
   after(reduce?200:1500,()=>{
@@ -236,6 +236,7 @@ function touch(px,py){
 }
 addEventListener("pointerdown",e=>touch(e.clientX,e.clientY));
 addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();touch(W/2,H*.45)}});
+if(location.hash==="#reset"){try{localStorage.removeItem(KEY+"-day");localStorage.removeItem(KEY+"-i")}catch(e){}}
 if(locked())hint.classList.add("off");
 
 /* オープニング: 墨が一滴落ちて滲む → いってき → 本画面（タップでスキップ） */
@@ -271,6 +272,6 @@ if(locked())hint.classList.add("off");
   after(5500,end);
 })();
 </script>
-<p class="ver">version 2026-11-02b</p>
+<p class="ver">version 2026-11-02c</p>
 </body>
 </html>
