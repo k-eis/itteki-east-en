@@ -48,6 +48,7 @@ article.sink,.foot.sink{animation:sink 3.6s cubic-bezier(.45,0,.85,.4) forwards}
 #drop{display:block;position:absolute;left:50%;top:50%;width:10px;height:14px;margin:-7px 0 0 -5px;border-radius:50% 50% 50% 50%/62% 62% 38% 38%;background:var(--ink);opacity:0}
 @media (prefers-reduced-motion:reduce){.fade,.hint,.foot,header,#intro .box{transition:none}.meta.fade,.foot{transition-delay:0s}article.sink,.foot.sink{animation:soft 1.2s forwards}}
 #tn{margin:.9em 0 0;font-size:11px;letter-spacing:.06em;line-height:1.6;color:var(--sub);opacity:.85}
+.ver{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -270,5 +271,6 @@ if(locked())hint.classList.add("off");
   after(5500,end);
 })();
 </script>
+<p class="ver">version 2026-11-02b</p>
 </body>
 </html>
